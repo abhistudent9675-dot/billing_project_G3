@@ -1,973 +1,365 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BillFlow — Billing System</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0d0d0f;--bg2:#131316;--bg3:#1a1a1f;--bg4:#222228;
-  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
-  --text:#f0eff4;--text2:#9998a8;--text3:#5c5b6e;
-  --accent:#6c63ff;--accent2:#8b84ff;--accentbg:rgba(108,99,255,.12);
-  --green:#22c55e;--greenbg:rgba(34,197,94,.1);
-  --red:#f43f5e;--redbg:rgba(244,63,94,.1);
-  --amber:#f59e0b;--amberbg:rgba(245,158,11,.1);
-  --blue:#38bdf8;--bluebg:rgba(56,189,248,.1);
-  --radius:10px;--radius-lg:16px;--radius-xl:22px;
-  font-family:'DM Sans',sans-serif;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BillFlow | Internal Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Using a professional font stack -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden}
+    <style>
+        /* 
+   THEME CONSTANTS
+   Senior devs define these first so the whole app looks consistent.
+*/
+        :root {
+            --color-black: #050505;
+            --color-surface: #0c0c0c;
+            --color-border: #1f1f1f;
+            --color-primary: #635bff;
+            --color-primary-hover: #7a73ff;
+            --color-text: #ffffff;
+            --color-text-muted: #888888;
 
-/* LAYOUT */
-.app{display:grid;grid-template-columns:230px 1fr;height:100vh;overflow:hidden}
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 2rem;
 
-/* SIDEBAR */
-.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;overflow:hidden}
-.logo{padding:22px 20px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.logo-mark{width:32px;height:32px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center}
-.logo-mark svg{width:16px;height:16px;fill:#fff}
-.logo-text{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;letter-spacing:-0.5px}
-.logo-text span{color:var(--accent2)}
-.nav{flex:1;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
-.nav-section{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:14px 10px 6px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--text2);font-size:13.5px;font-weight:400;transition:all .18s;position:relative;user-select:none}
-.nav-item:hover{color:var(--text);background:rgba(255,255,255,.04)}
-.nav-item.active{color:var(--text);background:var(--accentbg)}
-.nav-item.active::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:2.5px;background:var(--accent);border-radius:0 2px 2px 0}
-.nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.7}
-.nav-item.active svg{opacity:1}
-.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px}
-.sidebar-footer{padding:14px;border-top:1px solid var(--border)}
-.sidebar-user{display:flex;align-items:center;gap:10px}
-.sidebar-avatar{width:32px;height:32px;border-radius:50%;background:var(--accentbg);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--accent2);font-family:'Syne',sans-serif;flex-shrink:0}
-.sidebar-username{font-size:13px;font-weight:500}
-.sidebar-role{font-size:11px;color:var(--text3)}
+            --radius-main: 8px;
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+        }
 
-/* MAIN */
-.main{display:flex;flex-direction:column;overflow:hidden}
-.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;flex-shrink:0}
-.topbar-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;flex:1}
-.topbar-search{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;width:260px;transition:border-color .2s}
-.topbar-search:focus-within{border-color:var(--accent)}
-.topbar-search svg{width:13px;height:13px;color:var(--text3);flex-shrink:0}
-.topbar-search input{background:none;border:none;outline:none;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;width:100%}
-.topbar-search input::placeholder{color:var(--text3)}
-.topbar-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
-.btn-accent{background:var(--accent);color:#fff}
-.btn-accent:hover{background:var(--accent2);transform:translateY(-1px)}
-.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}
-.btn-ghost:hover{background:rgba(255,255,255,.05);color:var(--text)}
+        /* RESET */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-.content{flex:1;overflow-y:auto;padding:24px}
-.view{display:none;animation:fadeUp .3s ease}
-.view.active{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        body {
+            background-color: var(--color-black);
+            color: var(--color-text);
+            font-family: var(--font-main);
+            -webkit-font-smoothing: antialiased;
+        }
 
-/* CARDS */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;cursor:default;transition:border-color .2s,transform .2s;position:relative;overflow:hidden}
-.stat-card:hover{border-color:var(--border2);transform:translateY(-2px)}
-.stat-card::after{content:'';position:absolute;right:-20px;bottom:-20px;width:80px;height:80px;border-radius:50%;opacity:.06}
-.stat-card.blue::after{background:var(--blue)}
-.stat-card.green::after{background:var(--green)}
-.stat-card.red::after{background:var(--red)}
-.stat-card.amber::after{background:var(--amber)}
-.stat-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
-.stat-icon svg{width:17px;height:17px}
-.stat-icon.blue{background:var(--bluebg);color:var(--blue)}
-.stat-icon.green{background:var(--greenbg);color:var(--green)}
-.stat-icon.red{background:var(--redbg);color:var(--red)}
-.stat-icon.amber{background:var(--amberbg);color:var(--amber)}
-.stat-label{font-size:11.5px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:-1px;margin-bottom:4px}
-.stat-sub{font-size:11.5px;color:var(--text3)}
-.stat-sub b{font-weight:500}
-.stat-sub .up{color:var(--green)}
-.stat-sub .dn{color:var(--red)}
+        /* LAYOUT */
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+        }
 
-/* SECTION HEADERS */
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
-.section-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
-.section-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        .sidebar {
+            width: 260px;
+            background: var(--color-surface);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            padding: var(--spacing-lg) var(--spacing-md);
+        }
 
-/* FILTER BAR */
-.filter-chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:transparent;transition:all .15s;font-family:'DM Sans',sans-serif}
-.chip:hover{border-color:var(--border2);color:var(--text)}
-.chip.active{background:var(--accentbg);border-color:var(--accent);color:var(--accent2)}
-.chip.green{color:var(--green)}
-.chip.active.green{background:var(--greenbg);border-color:var(--green);color:var(--green)}
-.chip.red{color:var(--red)}
-.chip.active.red{background:var(--redbg);border-color:var(--red);color:var(--red)}
+        .main-content {
+            flex: 1;
+            padding: var(--spacing-lg) 3rem;
+            overflow-y: auto;
+        }
 
-/* DATE FILTER */
-.date-filter{display:flex;align-items:center;gap:8px}
-.date-input{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12.5px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;cursor:pointer}
-.date-input:focus{border-color:var(--accent)}
-.date-label{font-size:12px;color:var(--text3)}
+        /* COMPONENTS: Sidebar */
+        .sidebar__brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2.5rem;
+        }
 
-/* TABLE */
-.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
-table{width:100%;border-collapse:collapse}
-thead tr{background:var(--bg3)}
-th{text-align:left;padding:11px 16px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border)}
-tbody tr{border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer}
-tbody tr:last-child{border-bottom:none}
-tbody tr:hover{background:rgba(255,255,255,.025)}
-td{padding:12px 16px;font-size:13px;color:var(--text2);vertical-align:middle}
-td.primary{color:var(--text);font-weight:500}
+        .logo-box {
+            width: 32px;
+            height: 32px;
+            background: var(--color-primary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-/* BADGES */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:500}
-.badge-green{background:var(--greenbg);color:var(--green)}
-.badge-red{background:var(--redbg);color:var(--red)}
-.badge-amber{background:var(--amberbg);color:var(--amber)}
-.badge-blue{background:var(--bluebg);color:var(--blue)}
-.badge-purple{background:var(--accentbg);color:var(--accent2)}
-.badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+        .logo-icon {
+            width: 20px;
+            color: white;
+        }
 
-/* AVATAR */
-.avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:'Syne',sans-serif}
-.user-cell{display:flex;align-items:center;gap:10px}
-.user-name{font-weight:500;color:var(--text);font-size:13.5px}
-.user-email{font-size:11.5px;color:var(--text3)}
+        .nav-group__label {
+            font-size: 0.7rem;
+            color: var(--color-text-muted);
+            letter-spacing: 0.05em;
+            margin: 1.5rem 0 0.75rem 0.75rem;
+        }
 
-/* AMOUNT DISPLAY */
-.amt-credit{color:var(--green);font-family:'Syne',sans-serif;font-size:13.5px;font-weight:600}
-.amt-debit{color:var(--red);font-family:'Syne',sans-serif;font-size:13.5px;font-weight:600}
+        .nav-list {
+            list-style: none;
+        }
 
-/* ACTION BUTTONS */
-.act-btn{width:28px;height:28px;border-radius:7px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;color:var(--text2)}
-.act-btn:hover{background:var(--bg4);border-color:var(--border2);color:var(--text)}
-.act-btn svg{width:13px;height:13px}
+        .nav-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-radius: var(--radius-main);
+            transition: background 0.2s;
+        }
 
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:28px;width:480px;max-width:90vw;transform:scale(.95) translateY(10px);transition:transform .25s;max-height:90vh;overflow-y:auto}
-.modal-overlay.open .modal{transform:scale(1) translateY(0)}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
-.modal-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
-.modal-close{width:30px;height:30px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:15px;transition:background .15s}
-.modal-close:hover{background:var(--bg4)}
+        .nav-item:hover {
+            background: #161616;
+        }
 
-/* FORM */
-.form-field{margin-bottom:16px}
-.form-label{font-size:11.5px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:block}
-.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13.5px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
-.form-input:focus{border-color:var(--accent)}
-.form-input.err{border-color:var(--red)}
-.form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13.5px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;transition:border-color .2s}
-.form-select:focus{border-color:var(--accent)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.err-text{font-size:11px;color:var(--red);margin-top:4px;display:none}
-.err-text.show{display:block}
-.form-btn-row{display:flex;gap:10px;margin-top:24px}
-.form-btn{flex:1;padding:11px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
-.form-btn-primary{background:var(--accent);color:#fff}
-.form-btn-primary:hover{background:var(--accent2)}
-.form-btn-cancel{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
-.form-btn-cancel:hover{background:var(--bg4)}
-.form-btn-green{background:var(--green);color:#fff}
-.form-btn-green:hover{background:#16a34a}
-.form-btn-red{background:var(--red);color:#fff}
-.form-btn-red:hover{background:#e11d48}
+        .nav-item--active {
+            background: rgba(99, 91, 255, 0.1);
+            color: var(--color-primary);
+            font-weight: 500;
+        }
 
-/* DETAIL PANEL (slide-in) */
-.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90;opacity:0;pointer-events:none;transition:opacity .25s}
-.panel-overlay.open{opacity:1;pointer-events:all}
-.panel{position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--bg2);border-left:1px solid var(--border2);z-index:95;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:24px}
-.panel.open{transform:translateX(0)}
-.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.panel-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
-.panel-avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px}
-.panel-name{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:3px}
-.panel-email{font-size:13px;color:var(--text3);margin-bottom:20px}
-.detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
-.detail-row:last-child{border-bottom:none}
-.d-label{color:var(--text3)}
-.d-val{font-weight:500;color:var(--text)}
-.balance-box{background:var(--bg3);border-radius:var(--radius);padding:16px;margin-bottom:20px;text-align:center}
-.balance-label{font-size:11.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-.balance-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:-1px}
-.balance-val.positive{color:var(--green)}
-.balance-val.negative{color:var(--red)}
-.mini-txn{padding:10px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.mini-txn:last-child{border-bottom:none}
-.mini-txn-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.mini-txn-icon.credit{background:var(--greenbg);color:var(--green)}
-.mini-txn-icon.debit{background:var(--redbg);color:var(--red)}
-.mini-txn-icon svg{width:13px;height:13px}
-.mini-txn-info{flex:1}
-.mini-txn-desc{font-size:13px;font-weight:500;color:var(--text)}
-.mini-txn-date{font-size:11px;color:var(--text3)}
-.mini-txn-amt{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:600}
-.panel-actions{display:flex;flex-direction:column;gap:8px;margin-top:20px}
-.panel-btn{padding:10px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s;text-align:center}
-.panel-btn-green{background:var(--greenbg);color:var(--green)}
-.panel-btn-green:hover{background:rgba(34,197,94,.2)}
-.panel-btn-red{background:var(--redbg);color:var(--red)}
-.panel-btn-red:hover{background:rgba(244,63,94,.2)}
-.panel-btn-purple{background:var(--accentbg);color:var(--accent2)}
-.panel-btn-purple:hover{background:rgba(108,99,255,.2)}
+        .counter {
+            background: var(--color-primary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
 
-/* TOAST */
-.toast-container{position:fixed;bottom:24px;right:24px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.toast{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px 18px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;transform:translateX(100px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);pointer-events:none;min-width:220px}
-.toast.show{transform:translateX(0);opacity:1}
-.toast-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.toast.success .toast-dot{background:var(--green)}
-.toast.error .toast-dot{background:var(--red)}
-.toast.info .toast-dot{background:var(--accent)}
+        /* COMPONENTS: Header & Actions */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
 
-/* EMPTY */
-.empty-state{text-align:center;padding:50px 20px;color:var(--text3)}
-.empty-icon{font-size:36px;margin-bottom:10px;opacity:.3}
-.empty-text{font-size:14px}
+        .search-input {
+            background: #111;
+            border: 1px solid var(--color-border);
+            color: white;
+            padding: 12px 16px;
+            border-radius: var(--radius-main);
+            width: 340px;
+            outline: none;
+        }
 
-/* SEARCH HIGHLIGHT */
-mark{background:rgba(108,99,255,.25);color:var(--accent2);border-radius:2px;padding:0 2px}
+        .search-input:focus {
+            border-color: var(--color-primary);
+        }
 
-/* PAGINATION */
-.pagination{display:flex;align-items:center;gap:6px;justify-content:flex-end;padding:14px 16px;border-top:1px solid var(--border)}
-.page-btn{width:28px;height:28px;border-radius:7px;background:transparent;border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'DM Sans',sans-serif}
-.page-btn:hover{background:var(--bg3);color:var(--text)}
-.page-btn.active{background:var(--accentbg);border-color:var(--accent);color:var(--accent2)}
-.page-info{font-size:12px;color:var(--text3);margin-right:4px}
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
 
-/* CHART (mini bar) */
-.mini-chart{display:flex;align-items:flex-end;gap:4px;height:40px}
-.mini-bar{flex:1;border-radius:3px 3px 0 0;min-width:6px;transition:height .4s ease,opacity .2s}
-.mini-bar.credit{background:var(--green);opacity:.7}
-.mini-bar.debit{background:var(--red);opacity:.7}
-.mini-bar:hover{opacity:1}
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-main);
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
 
-/* BALANCE OVERVIEW */
-.balance-overview{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:24px}
-.balance-main{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.balance-big{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;letter-spacing:-2px}
-.balance-big.pos{color:var(--green)}
-.balance-big.neg{color:var(--red)}
-.balance-breakdown{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.breakdown-item{background:var(--bg3);border-radius:var(--radius);padding:12px 14px}
-.breakdown-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
-.breakdown-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+        .btn--primary {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+        }
 
-/* SCROLLBAR */
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:10px}
+        .btn--primary:hover {
+            background: var(--color-primary-hover);
+        }
 
-/* TRANSITIONS */
-.row-enter{animation:rowIn .25s ease both}
-@keyframes rowIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
-</style>
+        .btn--outline {
+            background: transparent;
+            color: white;
+            border: 1px solid var(--color-border);
+        }
+
+        .btn--outline:hover {
+            background: #111;
+        }
+
+        /* COMPONENTS: Cards */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border-radius: 12px;
+            border: 1px solid var(--color-border);
+            padding: 1.5rem;
+            min-height: 400px;
+        }
+
+        .card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card__title {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .card__divider {
+            height: 1px;
+            background: var(--color-border);
+            margin: 0 -1.5rem 1.5rem -1.5rem;
+        }
+
+        .btn-link {
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-muted);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        /* User Profile Footer */
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .user-pill__avatar {
+            width: 36px;
+            height: 36px;
+            background: #222;
+            border: 1px solid var(--color-primary);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 0.8rem;
+        }
+
+        .user-name {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .user-role {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+    </style>
 </head>
+
 <body>
-<div class="app">
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="logo">
-      <div class="logo-mark">
-        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-      </div>
-      <div class="logo-text">Bill<span>Flow</span></div>
-    </div>
-    <nav class="nav">
-      <div class="nav-section">Overview</div>
-      <div class="nav-item active" data-view="dashboard" onclick="navigate('dashboard',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Dashboard
-      </div>
-      <div class="nav-section">Customers</div>
-      <div class="nav-item" data-view="customers" onclick="navigate('customers',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Customers
-        <span class="nav-badge" id="custCount">0</span>
-      </div>
-      <div class="nav-section">Finance</div>
-      <div class="nav-item" data-view="transactions" onclick="navigate('transactions',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-        Transactions
-        <span class="nav-badge" id="txnCount">0</span>
-      </div>
-      <div class="nav-item" data-view="balance" onclick="navigate('balance',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        Balance
-      </div>
-      <div class="nav-item" data-view="history" onclick="navigate('history',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        History
-      </div>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-user">
-        <div class="sidebar-avatar">A</div>
-        <div>
-          <div class="sidebar-username">Admin</div>
-          <div class="sidebar-role">Billing Manager</div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- MAIN CONTENT -->
-  <div class="main">
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <div class="topbar-title" id="topbarTitle">Dashboard</div>
-      <div class="topbar-search">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input id="globalSearch" placeholder="Search customers, transactions…" oninput="onGlobalSearch()">
-      </div>
-      <button class="topbar-btn btn-ghost" onclick="openAddTxn()">+ Transaction</button>
-      <button class="topbar-btn btn-accent" onclick="openAddCustomer()">+ Customer</button>
-    </div>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <header class="sidebar__brand">
+                <div class="logo-box">
+                    <svg viewBox="0 0 24 24" class="logo-icon">
+                        <path fill="currentColor" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                    </svg>
+                </div>
+                <h1 class="brand-name">BillFlow</h1>
+            </header>
 
-    <div class="content">
+            <nav class="sidebar__nav" aria-label="Main Navigation">
+                <section class="nav-group">
+                    <h2 class="nav-group__label">OVERVIEW</h2>
+                    <ul class="nav-list">
+                        <li><a href="#" class="nav-item nav-item--active">Dashboard</a></li>
+                    </ul>
+                </section>
 
-      <!-- DASHBOARD VIEW -->
-      <div id="view-dashboard" class="view active">
-        <div class="stats-grid" id="statsGrid"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-          <div>
-            <div class="section-header">
-              <div class="section-title">Recent transactions</div>
-              <button class="topbar-btn btn-ghost" style="font-size:12px;padding:5px 10px" onclick="navigate('transactions',document.querySelector('[data-view=transactions]'))">View all</button>
+                <section class="nav-group">
+                    <h2 class="nav-group__label">CUSTOMERS</h2>
+                    <ul class="nav-list">
+                        <li>
+                            <a href="#" class="nav-item">
+                                Customers <span class="counter">0</span>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="nav-group">
+                    <h2 class="nav-group__label">FINANCE</h2>
+                    <ul class="nav-list">
+                        <li><a href="#" class="nav-item">Transactions <span class="counter">0</span></a></li>
+                        <li><a href="#" class="nav-item">Balance</a></li>
+                        <li><a href="#" class="nav-item">History</a></li>
+                    </ul>
+                </section>
+            </nav>
+
+            <footer class="sidebar__footer">
+                <div class="user-pill">
+                    <div class="user-pill__avatar">A</div>
+                    <div class="user-pill__text">
+                        <span class="user-name">Admin</span>
+                        <span class="user-role">Billing Manager</span>
+                    </div>
+                </div>
+            </footer>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-bar">
+                <h2 class="page-title">Dashboard</h2>
+
+                <div class="top-bar__actions">
+                    <div class="search-container">
+                        <input type="search" placeholder="Search customers, transactions..." class="search-input">
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn--outline">+ Transaction</button>
+                        <button class="btn btn--primary">+ Customer</button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="grid-layout">
+                <section class="card card--main">
+                    <div class="card__header">
+                        <h3 class="card__title">Recent transactions</h3>
+                        <button class="btn-link">View all</button>
+                    </div>
+                    <div class="card__divider"></div>
+                    <div class="card__body empty-state">
+                        <!-- Content injection point -->
+                    </div>
+                </section>
+
+                <section class="card card--sidebar">
+                    <div class="card__header">
+                        <h3 class="card__title">Top customers</h3>
+                    </div>
+                    <div class="card__divider"></div>
+                    <div class="card__body empty-state">
+                        <!-- Content injection point -->
+                    </div>
+                </section>
             </div>
-            <div class="table-wrap" id="recentTxns"></div>
-          </div>
-          <div>
-            <div class="section-header"><div class="section-title">Top customers</div></div>
-            <div class="table-wrap" id="topCustomers"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CUSTOMERS VIEW -->
-      <div id="view-customers" class="view">
-        <div class="section-header">
-          <div class="section-title">All customers</div>
-          <div class="section-controls">
-            <div class="filter-chips" id="custFilterChips">
-              <button class="chip active" data-f="all" onclick="setCustFilter('all',this)">All</button>
-              <button class="chip green" data-f="active" onclick="setCustFilter('active',this)">Active</button>
-              <button class="chip red" data-f="inactive" onclick="setCustFilter('inactive',this)">Inactive</button>
-            </div>
-            <div style="position:relative;display:flex;align-items:center">
-              <svg style="position:absolute;left:9px;width:13px;height:13px;color:var(--text3)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input id="custSearch" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px 6px 28px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:190px" placeholder="Search customers…" oninput="renderCustomers()">
-            </div>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Customer</th><th>Phone</th><th>Status</th><th>Balance</th><th>Transactions</th><th>Joined</th><th></th></tr></thead>
-            <tbody id="custTableBody"></tbody>
-          </table>
-          <div class="pagination" id="custPagination"></div>
-        </div>
-      </div>
-
-      <!-- TRANSACTIONS VIEW -->
-      <div id="view-transactions" class="view">
-        <div class="section-header">
-          <div class="section-title">All transactions</div>
-          <div class="section-controls">
-            <div class="filter-chips">
-              <button class="chip active" data-f="all" onclick="setTxnFilter('all',this)">All</button>
-              <button class="chip green" data-f="credit" onclick="setTxnFilter('credit',this)">Credit</button>
-              <button class="chip red" data-f="debit" onclick="setTxnFilter('debit',this)">Debit</button>
-            </div>
-            <div class="date-filter">
-              <span class="date-label">From</span>
-              <input type="date" class="date-input" id="txnDateFrom" onchange="renderTransactions()">
-              <span class="date-label">To</span>
-              <input type="date" class="date-input" id="txnDateTo" onchange="renderTransactions()">
-              <button class="chip" onclick="clearDateFilter()">Clear</button>
-            </div>
-          </div>
-        </div>
-        <div style="position:relative;display:flex;align-items:center;margin-bottom:14px">
-          <svg style="position:absolute;left:12px;width:13px;height:13px;color:var(--text3)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input id="txnSearch" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px 9px 34px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:100%;transition:border-color .2s" placeholder="Search by customer, description, amount…" oninput="renderTransactions()" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Txn ID</th><th>Customer</th><th>Type</th><th>Description</th><th>Amount</th><th>Balance After</th><th>Date</th><th></th></tr></thead>
-            <tbody id="txnTableBody"></tbody>
-          </table>
-          <div class="pagination" id="txnPagination"></div>
-        </div>
-      </div>
-
-      <!-- BALANCE VIEW -->
-      <div id="view-balance" class="view">
-        <div class="balance-overview">
-          <div class="balance-main">
-            <div>
-              <div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Total system balance</div>
-              <div class="balance-big pos" id="totalBalBig">$0</div>
-            </div>
-            <div class="mini-chart" id="balChart"></div>
-          </div>
-          <div class="balance-breakdown" id="balBreakdown"></div>
-        </div>
-        <div class="section-header"><div class="section-title">Customer balances</div></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Customer</th><th>Total credited</th><th>Total debited</th><th>Net balance</th><th>Last activity</th><th></th></tr></thead>
-            <tbody id="balTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- HISTORY VIEW -->
-      <div id="view-history" class="view">
-        <div class="section-header">
-          <div class="section-title">Transaction history</div>
-          <div class="section-controls">
-            <div class="date-filter">
-              <span class="date-label">From</span>
-              <input type="date" class="date-input" id="histDateFrom" onchange="renderHistory()">
-              <span class="date-label">To</span>
-              <input type="date" class="date-input" id="histDateTo" onchange="renderHistory()">
-              <button class="chip" onclick="clearHistFilter()">Clear</button>
-            </div>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Date</th><th>Customer</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th></tr></thead>
-            <tbody id="histTableBody"></tbody>
-          </table>
-          <div class="pagination" id="histPagination"></div>
-        </div>
-      </div>
-
+        </main>
     </div>
-  </div>
-</div>
 
-<!-- DETAIL PANEL -->
-<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
-<div class="panel" id="detailPanel">
-  <div class="panel-header">
-    <div class="panel-title">Customer details</div>
-    <div class="modal-close" onclick="closePanel()">✕</div>
-  </div>
-  <div id="panelContent"></div>
-</div>
-
-<!-- ADD CUSTOMER MODAL -->
-<div class="modal-overlay" id="addCustModal">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <div class="modal-title">Add new customer</div>
-      <div class="modal-close" onclick="closeModal('addCustModal')">✕</div>
-    </div>
-    <div class="form-row">
-      <div class="form-field">
-        <label class="form-label">First name</label>
-        <input class="form-input" id="cf-fname" placeholder="Arjun">
-        <div class="err-text" id="cf-fname-err">Required</div>
-      </div>
-      <div class="form-field">
-        <label class="form-label">Last name</label>
-        <input class="form-input" id="cf-lname" placeholder="Sharma">
-        <div class="err-text" id="cf-lname-err">Required</div>
-      </div>
-    </div>
-    <div class="form-field">
-      <label class="form-label">Email</label>
-      <input class="form-input" id="cf-email" type="email" placeholder="arjun@company.in">
-      <div class="err-text" id="cf-email-err">Valid email required</div>
-    </div>
-    <div class="form-row">
-      <div class="form-field">
-        <label class="form-label">Phone</label>
-        <input class="form-input" id="cf-phone" placeholder="+91 98765 43210">
-      </div>
-      <div class="form-field">
-        <label class="form-label">Company</label>
-        <input class="form-input" id="cf-company" placeholder="Acme Corp">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-field">
-        <label class="form-label">Plan</label>
-        <select class="form-select" id="cf-plan">
-          <option value="Free">Free</option>
-          <option value="Basic">Basic</option>
-          <option value="Pro" selected>Pro</option>
-          <option value="Enterprise">Enterprise</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label class="form-label">Status</label>
-        <select class="form-select" id="cf-status">
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-btn-row">
-      <button class="form-btn form-btn-cancel" onclick="closeModal('addCustModal')">Cancel</button>
-      <button class="form-btn form-btn-primary" onclick="submitAddCustomer()">Add customer</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADD TRANSACTION MODAL -->
-<div class="modal-overlay" id="addTxnModal">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <div class="modal-title">New transaction</div>
-      <div class="modal-close" onclick="closeModal('addTxnModal')">✕</div>
-    </div>
-    <div class="form-field">
-      <label class="form-label">Customer</label>
-      <select class="form-select" id="tf-customer">
-        <option value="">Select customer…</option>
-      </select>
-      <div class="err-text" id="tf-customer-err">Select a customer</div>
-    </div>
-    <div class="form-row">
-      <div class="form-field">
-        <label class="form-label">Type</label>
-        <select class="form-select" id="tf-type">
-          <option value="credit">Credit (Money In)</option>
-          <option value="debit">Debit (Money Out)</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label class="form-label">Amount (₹)</label>
-        <input class="form-input" id="tf-amount" type="number" min="0.01" step="0.01" placeholder="0.00">
-        <div class="err-text" id="tf-amount-err">Enter valid amount</div>
-      </div>
-    </div>
-    <div class="form-field">
-      <label class="form-label">Description</label>
-      <input class="form-input" id="tf-desc" placeholder="Invoice #1234, Payment received…">
-      <div class="err-text" id="tf-desc-err">Required</div>
-    </div>
-    <div class="form-field">
-      <label class="form-label">Date</label>
-      <input class="form-input" id="tf-date" type="date">
-    </div>
-    <div class="form-btn-row">
-      <button class="form-btn form-btn-cancel" onclick="closeModal('addTxnModal')">Cancel</button>
-      <button class="form-btn form-btn-green" id="tf-submit" onclick="submitAddTxn()">Add credit</button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST CONTAINER -->
-<div class="toast-container" id="toastContainer"></div>
-
-<script>
-// ─── DATA STORE ──────────────────────────────────────────────
-const COLORS=[
-  {bg:'#1e3a5f',color:'#93c5fd'},{bg:'#1a3a2a',color:'#86efac'},
-  {bg:'#3b1f3f',color:'#d8b4fe'},{bg:'#3a1a1a',color:'#fca5a5'},
-  {bg:'#2a2a1a',color:'#fde047'},{bg:'#1a2e3a',color:'#67e8f9'},
-  {bg:'#2a1a2e',color:'#c084fc'},{bg:'#1a3a30',color:'#6ee7b7'},
-];
-
-let customers=[];
-let transactions=[];
-let custPage=1,txnPage=1,histPage=1;
-const PER=8;
-let txnFilter='all',custFilter='all';
-
-// Seed data
-function seed(){
-  const names=[['Arjun','Sharma','arjun@acme.in','+91 98765 43210','TechCo'],
-    ['Priya','Patel','priya@fresh.io','+91 87654 32109','FreshWorks'],
-    ['Rahul','Verma','rahul@cloud.in','+91 76543 21098','CloudLabs'],
-    ['Sunita','Gupta','sunita@start.co','+91 65432 10987','StartupCo'],
-    ['Dev','Malhotra','dev@biz.in','+91 54321 09876','BizCorp'],
-    ['Meera','Iyer','meera@saas.in','+91 43210 98765','SaaSify'],
-  ];
-  names.forEach((n,i)=>{
-    customers.push({id:'C'+String(i+1).padStart(4,'0'),fname:n[0],lname:n[1],email:n[2],phone:n[3],company:n[4],plan:['Pro','Basic','Enterprise','Free','Pro','Basic'][i],status:['active','active','active','inactive','active','active'][i],joined:new Date(2024,(i*2)%12,i+5).toISOString().split('T')[0],color:COLORS[i%COLORS.length]});
-  });
-  const descs=[['Invoice payment','Monthly subscription','Project advance','Refund issued','Service charge','Equipment purchase'],
-    ['Consulting fee','License renewal','Support package','Overpayment return','Platform fee','Domain renewal']];
-  let d=new Date('2025-01-01');
-  for(let i=0;i<24;i++){
-    const cust=customers[i%customers.length];
-    const type=i%3===2?'debit':'credit';
-    const amt=type==='credit'?[5000,12000,8000,25000,3500,9000][i%6]:[2000,5500,1200,8000,1800,4000][i%6];
-    const desc=descs[type==='credit'?0:1][i%6];
-    d=new Date(d.getTime()+2*24*60*60*1000);
-    transactions.push({id:'T'+String(i+1).padStart(5,'0'),custId:cust.id,type,amt,desc,date:d.toISOString().split('T')[0]});
-  }
-  updateCounts();
-}
-
-function updateCounts(){
-  document.getElementById('custCount').textContent=customers.length;
-  document.getElementById('txnCount').textContent=transactions.length;
-}
-
-function custById(id){return customers.find(c=>c.id===id);}
-function custName(id){const c=custById(id);return c?c.fname+' '+c.lname:'Unknown';}
-function custTxns(id){return transactions.filter(t=>t.custId===id);}
-function custBalance(id){
-  return custTxns(id).reduce((a,t)=>t.type==='credit'?a+t.amt:a-t.amt,0);
-}
-function totalCredit(){return transactions.filter(t=>t.type==='credit').reduce((a,t)=>a+t.amt,0);}
-function totalDebit(){return transactions.filter(t=>t.type==='debit').reduce((a,t)=>a+t.amt,0);}
-function totalBalance(){return totalCredit()-totalDebit();}
-
-function fmt(n){return'₹'+Math.abs(n).toLocaleString('en-IN');}
-function fmtDate(d){return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}
-function initials(c){return(c.fname[0]+c.lname[0]).toUpperCase();}
-
-// ─── NAVIGATION ──────────────────────────────────────────────
-const TITLES={dashboard:'Dashboard',customers:'Customers',transactions:'Transactions',balance:'Balance',history:'History'};
-function navigate(view,el){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('view-'+view).classList.add('active');
-  el.classList.add('active');
-  document.getElementById('topbarTitle').textContent=TITLES[view];
-  if(view==='dashboard')renderDashboard();
-  if(view==='customers')renderCustomers();
-  if(view==='transactions')renderTransactions();
-  if(view==='balance')renderBalance();
-  if(view==='history')renderHistory();
-}
-
-// ─── DASHBOARD ───────────────────────────────────────────────
-function renderDashboard(){
-  const tc=totalCredit(),td=totalDebit(),tb=totalBalance();
-  const stats=[
-    {label:'Total customers',val:customers.length,sub:'<span class="up">+'+customers.filter(c=>c.status==='active').length+' active</span>',icon:'<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',cls:'blue',cardCls:'blue'},
-    {label:'Total credited',val:fmt(tc),sub:'<span class="up">Money received</span>',icon:'<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>',cls:'green',cardCls:'green'},
-    {label:'Total debited',val:fmt(td),sub:'<span class="dn">Money out</span>',icon:'<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>',cls:'red',cardCls:'red'},
-    {label:'Net balance',val:(tb>=0?'':'−')+fmt(tb),sub:tb>=0?'<span class="up">Surplus</span>':'<span class="dn">Deficit</span>',icon:'<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',cls:'amber',cardCls:'amber'},
-  ];
-  document.getElementById('statsGrid').innerHTML=stats.map((s,i)=>`
-    <div class="stat-card ${s.cardCls}" style="animation-delay:${i*.08}s;animation:fadeUp .3s ease ${i*.08}s both">
-      <div class="stat-icon ${s.cls}">${s.icon}</div>
-      <div class="stat-label">${s.label}</div>
-      <div class="stat-val">${s.val}</div>
-      <div class="stat-sub">${s.sub}</div>
-    </div>`).join('');
-
-  const recent=transactions.slice(-6).reverse();
-  document.getElementById('recentTxns').innerHTML=recent.length?`<table><tbody>${recent.map(t=>{const c=custById(t.custId);return`<tr class="row-enter" onclick="openPanel(${JSON.stringify(t.custId).replace(/"/g,'&quot;')})">
-    <td><div class="user-cell"><div class="avatar" style="background:${c?c.color.bg:'#222'};color:${c?c.color.color:'#aaa'};font-size:11px;width:28px;height:28px">${c?initials(c):'?'}</div><span class="primary">${custName(t.custId)}</span></div></td>
-    <td><span class="badge ${t.type==='credit'?'badge-green':'badge-red'}"><span class="badge-dot"></span>${t.type}</span></td>
-    <td class="${t.type==='credit'?'amt-credit':'amt-debit'}">${t.type==='credit'?'+':'-'}${fmt(t.amt)}</td>
-    <td style="font-size:12px;color:var(--text3)">${fmtDate(t.date)}</td>
-  </tr>`}).join('')}</tbody></table>`:'<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">No transactions yet</div></div>';
-
-  const topC=[...customers].map(c=>({c,bal:custBalance(c.id),cnt:custTxns(c.id).length})).sort((a,b)=>b.bal-a.bal).slice(0,5);
-  document.getElementById('topCustomers').innerHTML=topC.length?`<table><tbody>${topC.map(({c,bal,cnt})=>`<tr class="row-enter" onclick="openPanel('${c.id}')">
-    <td><div class="user-cell"><div class="avatar" style="background:${c.color.bg};color:${c.color.color};font-size:11px;width:28px;height:28px">${initials(c)}</div><div><div class="user-name">${c.fname} ${c.lname}</div><div class="user-email">${cnt} txns</div></div></div></td>
-    <td class="${bal>=0?'amt-credit':'amt-debit'}">${bal>=0?'+':'-'}${fmt(bal)}</td>
-  </tr>`}).join('')}</tbody></table>`:'<div class="empty-state"><div class="empty-text">No customers</div></div>';
-}
-
-// ─── CUSTOMERS ───────────────────────────────────────────────
-function setCustFilter(f,el){
-  custFilter=f;custPage=1;
-  document.querySelectorAll('#custFilterChips .chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');renderCustomers();
-}
-function getFilteredCusts(){
-  const q=(document.getElementById('custSearch').value||'').toLowerCase();
-  return customers.filter(c=>{
-    const mf=custFilter==='all'||c.status===custFilter;
-    const mq=!q||(c.fname+' '+c.lname).toLowerCase().includes(q)||c.email.toLowerCase().includes(q)||c.company.toLowerCase().includes(q);
-    return mf&&mq;
-  });
-}
-function renderCustomers(){
-  const list=getFilteredCusts();
-  const total=Math.max(1,Math.ceil(list.length/PER));
-  if(custPage>total)custPage=1;
-  const slice=list.slice((custPage-1)*PER,custPage*PER);
-  const q=(document.getElementById('custSearch').value||'').toLowerCase();
-  const hl=(t)=>q?t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>'):t;
-  document.getElementById('custTableBody').innerHTML=slice.length?slice.map((c,i)=>{
-    const bal=custBalance(c.id);const cnt=custTxns(c.id).length;
-    return`<tr class="row-enter" style="animation-delay:${i*.04}s" onclick="openPanel('${c.id}')">
-      <td><div class="user-cell"><div class="avatar" style="background:${c.color.bg};color:${c.color.color};font-size:11px">${initials(c)}</div><div><div class="user-name">${hl(c.fname+' '+c.lname)}</div><div class="user-email">${hl(c.email)}</div></div></div></td>
-      <td>${c.phone||'—'}</td>
-      <td><span class="badge ${c.status==='active'?'badge-green':'badge-red'}"><span class="badge-dot"></span>${c.status}</span></td>
-      <td class="${bal>=0?'amt-credit':'amt-debit'}">${bal>=0?'+':'-'}${fmt(bal)}</td>
-      <td>${cnt}</td>
-      <td style="font-size:12px;color:var(--text3)">${fmtDate(c.joined)}</td>
-      <td><button class="act-btn" title="View" onclick="event.stopPropagation();openPanel('${c.id}')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
-    </tr>`;}).join(''):'<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">No customers found</div></div></td></tr>';
-  renderPagination('custPagination',custPage,total,(n)=>{custPage=n;renderCustomers();});
-}
-
-// ─── TRANSACTIONS ─────────────────────────────────────────────
-function setTxnFilter(f,el){
-  txnFilter=f;txnPage=1;
-  document.querySelectorAll('#view-transactions .filter-chips .chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');renderTransactions();
-}
-function getFilteredTxns(){
-  const q=(document.getElementById('txnSearch')||{value:''}).value.toLowerCase();
-  const from=document.getElementById('txnDateFrom').value;
-  const to=document.getElementById('txnDateTo').value;
-  return transactions.filter(t=>{
-    const mf=txnFilter==='all'||t.type===txnFilter;
-    const mq=!q||(custName(t.custId).toLowerCase().includes(q)||t.desc.toLowerCase().includes(q)||t.id.toLowerCase().includes(q)||String(t.amt).includes(q));
-    const mDate=(!from||t.date>=from)&&(!to||t.date<=to);
-    return mf&&mq&&mDate;
-  });
-}
-function clearDateFilter(){
-  document.getElementById('txnDateFrom').value='';
-  document.getElementById('txnDateTo').value='';
-  renderTransactions();
-}
-function clearHistFilter(){
-  document.getElementById('histDateFrom').value='';
-  document.getElementById('histDateTo').value='';
-  renderHistory();
-}
-function renderTransactions(){
-  const list=getFilteredTxns().slice().reverse();
-  const total=Math.max(1,Math.ceil(list.length/PER));
-  if(txnPage>total)txnPage=1;
-  const slice=list.slice((txnPage-1)*PER,txnPage*PER);
-  const q=(document.getElementById('txnSearch')||{value:''}).value.toLowerCase();
-  const hl=(t)=>q?t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>'):t;
-  let running={};
-  customers.forEach(c=>{running[c.id]=0;});
-  const sorted=[...transactions].sort((a,b)=>a.date.localeCompare(b.date));
-  let bal={};customers.forEach(c=>{bal[c.id]=0;});
-  sorted.forEach(t=>{bal[t.custId]+=t.type==='credit'?t.amt:-t.amt;(t._bal=bal[t.custId]);});
-  document.getElementById('txnTableBody').innerHTML=slice.length?slice.map((t,i)=>{
-    const c=custById(t.custId);
-    return`<tr class="row-enter" style="animation-delay:${i*.04}s">
-      <td style="font-family:'Syne',sans-serif;font-size:12px;color:var(--text3)">${t.id}</td>
-      <td><div class="user-cell"><div class="avatar" style="background:${c?c.color.bg:'#222'};color:${c?c.color.color:'#aaa'};font-size:10px;width:28px;height:28px">${c?initials(c):'?'}</div><span class="primary" onclick="openPanel('${t.custId}')" style="cursor:pointer">${hl(custName(t.custId))}</span></div></td>
-      <td><span class="badge ${t.type==='credit'?'badge-green':'badge-red'}"><span class="badge-dot"></span>${t.type==='credit'?'Credit':'Debit'}</span></td>
-      <td>${hl(t.desc)}</td>
-      <td class="${t.type==='credit'?'amt-credit':'amt-debit'}">${t.type==='credit'?'+':'-'}${fmt(t.amt)}</td>
-      <td style="font-family:'Syne',sans-serif;font-size:13px;color:var(--text2)">${(t._bal>=0?'+':'-')+fmt(t._bal)}</td>
-      <td style="font-size:12px;color:var(--text3)">${fmtDate(t.date)}</td>
-      <td><button class="act-btn" onclick="openPanel('${t.custId}')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
-    </tr>`;}).join(''):'<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No transactions found</div></div></td></tr>';
-  renderPagination('txnPagination',txnPage,total,(n)=>{txnPage=n;renderTransactions();});
-}
-
-// ─── BALANCE ──────────────────────────────────────────────────
-function renderBalance(){
-  const tc=totalCredit(),td=totalDebit(),tb=totalBalance();
-  const bv=document.getElementById('totalBalBig');
-  bv.textContent=(tb>=0?'+':'-')+fmt(tb);
-  bv.className='balance-big '+(tb>=0?'pos':'neg');
-  document.getElementById('balBreakdown').innerHTML=`
-    <div class="breakdown-item"><div class="breakdown-label">Total customers</div><div class="breakdown-val" style="color:var(--blue)">${customers.length}</div></div>
-    <div class="breakdown-item"><div class="breakdown-label">Total credited</div><div class="breakdown-val" style="color:var(--green)">${fmt(tc)}</div></div>
-    <div class="breakdown-item"><div class="breakdown-label">Total debited</div><div class="breakdown-val" style="color:var(--red)">${fmt(td)}</div></div>`;
-  const last7=[];let d=new Date();for(let i=6;i>=0;i--){let dd=new Date(d);dd.setDate(dd.getDate()-i);last7.push(dd.toISOString().split('T')[0]);}
-  const maxAmt=Math.max(...last7.map(day=>{const t=transactions.filter(t=>t.date===day);return Math.max(t.filter(x=>x.type==='credit').reduce((a,x)=>a+x.amt,0),t.filter(x=>x.type==='debit').reduce((a,x)=>a+x.amt,0),1);}));
-  document.getElementById('balChart').innerHTML=last7.map(day=>{
-    const cr=transactions.filter(t=>t.date===day&&t.type==='credit').reduce((a,t)=>a+t.amt,0);
-    const db=transactions.filter(t=>t.date===day&&t.type==='debit').reduce((a,t)=>a+t.amt,0);
-    return`<div style="display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end">
-      <div class="mini-bar credit" style="height:${Math.max(4,Math.round(cr/maxAmt*36))}px" title="+${fmt(cr)}"></div>
-      <div class="mini-bar debit" style="height:${Math.max(4,Math.round(db/maxAmt*36))}px" title="-${fmt(db)}"></div>
-    </div>`;}).join('');
-  document.getElementById('balTableBody').innerHTML=customers.map(c=>{
-    const txns=custTxns(c.id);
-    const cr=txns.filter(t=>t.type==='credit').reduce((a,t)=>a+t.amt,0);
-    const db=txns.filter(t=>t.type==='debit').reduce((a,t)=>a+t.amt,0);
-    const bal=cr-db;
-    const last=txns.sort((a,b)=>b.date.localeCompare(a.date))[0];
-    return`<tr onclick="openPanel('${c.id}')">
-      <td><div class="user-cell"><div class="avatar" style="background:${c.color.bg};color:${c.color.color};font-size:11px">${initials(c)}</div><div><div class="user-name">${c.fname} ${c.lname}</div><div class="user-email">${c.company}</div></div></div></td>
-      <td class="amt-credit">+${fmt(cr)}</td>
-      <td class="amt-debit">-${fmt(db)}</td>
-      <td class="${bal>=0?'amt-credit':'amt-debit'}">${bal>=0?'+':'-'}${fmt(bal)}</td>
-      <td style="font-size:12px;color:var(--text3)">${last?fmtDate(last.date):'—'}</td>
-      <td><button class="act-btn" onclick="event.stopPropagation();openPanel('${c.id}')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
-    </tr>`;}).join('');
-}
-
-// ─── HISTORY ──────────────────────────────────────────────────
-function renderHistory(){
-  const from=document.getElementById('histDateFrom').value;
-  const to=document.getElementById('histDateTo').value;
-  const sorted=[...transactions].filter(t=>(!from||t.date>=from)&&(!to||t.date<=to)).sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
-  const total=Math.max(1,Math.ceil(sorted.length/PER));
-  if(histPage>total)histPage=1;
-  const slice=sorted.slice((histPage-1)*PER,histPage*PER);
-  let cumBal={};customers.forEach(c=>{cumBal[c.id]=custBalance(c.id);});
-  document.getElementById('histTableBody').innerHTML=slice.length?slice.map((t,i)=>{
-    const c=custById(t.custId);
-    return`<tr class="row-enter" style="animation-delay:${i*.04}s">
-      <td style="font-size:12px;color:var(--text3)">${fmtDate(t.date)}</td>
-      <td><div class="user-cell"><div class="avatar" style="background:${c?c.color.bg:'#222'};color:${c?c.color.color:'#aaa'};font-size:10px;width:28px;height:28px">${c?initials(c):'?'}</div><span class="primary" onclick="openPanel('${t.custId}')" style="cursor:pointer">${custName(t.custId)}</span></div></td>
-      <td>${t.desc}</td>
-      <td class="amt-debit">${t.type==='debit'?fmt(t.amt):'—'}</td>
-      <td class="amt-credit">${t.type==='credit'?fmt(t.amt):'—'}</td>
-      <td style="font-family:'Syne',sans-serif;font-size:13px"><span class="badge ${custBalance(t.custId)>=0?'badge-green':'badge-red'}">${(custBalance(t.custId)>=0?'+':'-')+fmt(custBalance(t.custId))}</span></td>
-    </tr>`;}).join(''):'<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">No history found</div></div></td></tr>';
-  renderPagination('histPagination',histPage,total,(n)=>{histPage=n;renderHistory();});
-}
-
-// ─── PAGINATION ────────────────────────────────────────────────
-function renderPagination(id,cur,total,cb){
-  const el=document.getElementById(id);
-  if(total<=1){el.innerHTML='';return;}
-  let html=`<span class="page-info">${(cur-1)*PER+1}–${Math.min(cur*PER,total*PER)} of ${total*PER}</span>`;
-  html+=`<button class="page-btn" onclick="(${cb.toString()})(${cur-1})" ${cur===1?'disabled style="opacity:.3"':''}>‹</button>`;
-  for(let i=1;i<=total;i++)html+=`<button class="page-btn${i===cur?' active':''}" onclick="(${cb.toString()})(${i})">${i}</button>`;
-  html+=`<button class="page-btn" onclick="(${cb.toString()})(${cur+1})" ${cur===total?'disabled style="opacity:.3"':''}>›</button>`;
-  el.innerHTML=html;
-}
-
-// ─── DETAIL PANEL ─────────────────────────────────────────────
-function openPanel(custId){
-  const c=custById(custId);if(!c)return;
-  const txns=custTxns(custId).sort((a,b)=>b.date.localeCompare(a.date));
-  const bal=custBalance(custId);
-  const cr=txns.filter(t=>t.type==='credit').reduce((a,t)=>a+t.amt,0);
-  const db=txns.filter(t=>t.type==='debit').reduce((a,t)=>a+t.amt,0);
-  document.getElementById('panelContent').innerHTML=`
-    <div class="panel-avatar" style="background:${c.color.bg};color:${c.color.color}">${initials(c)}</div>
-    <div class="panel-name">${c.fname} ${c.lname}</div>
-    <div class="panel-email">${c.email}</div>
-    <div class="balance-box">
-      <div class="balance-label">Net balance</div>
-      <div class="balance-val ${bal>=0?'positive':'negative'}">${bal>=0?'+':'-'}${fmt(bal)}</div>
-    </div>
-    <div class="detail-row"><span class="d-label">Customer ID</span><span class="d-val" style="font-size:12px;color:var(--text3)">${c.id}</span></div>
-    <div class="detail-row"><span class="d-label">Company</span><span class="d-val">${c.company||'—'}</span></div>
-    <div class="detail-row"><span class="d-label">Phone</span><span class="d-val">${c.phone||'—'}</span></div>
-    <div class="detail-row"><span class="d-label">Plan</span><span class="d-val"><span class="badge badge-purple">${c.plan}</span></span></div>
-    <div class="detail-row"><span class="d-label">Status</span><span class="d-val"><span class="badge ${c.status==='active'?'badge-green':'badge-red'}"><span class="badge-dot"></span>${c.status}</span></span></div>
-    <div class="detail-row"><span class="d-label">Joined</span><span class="d-val">${fmtDate(c.joined)}</span></div>
-    <div class="detail-row"><span class="d-label">Total credited</span><span class="d-val amt-credit">+${fmt(cr)}</span></div>
-    <div class="detail-row"><span class="d-label">Total debited</span><span class="d-val amt-debit">-${fmt(db)}</span></div>
-    <div style="margin-top:18px;margin-bottom:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text)">Recent transactions</div>
-    ${txns.slice(0,5).map(t=>`<div class="mini-txn">
-      <div class="mini-txn-icon ${t.type}"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${t.type==='credit'?'<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>':'<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>'}</svg></div>
-      <div class="mini-txn-info"><div class="mini-txn-desc">${t.desc}</div><div class="mini-txn-date">${fmtDate(t.date)}</div></div>
-      <div class="mini-txn-amt ${t.type==='credit'?'amt-credit':'amt-debit'}">${t.type==='credit'?'+':'-'}${fmt(t.amt)}</div>
-    </div>`).join('')}
-    ${txns.length===0?'<div style="color:var(--text3);font-size:13px;padding:10px 0">No transactions yet</div>':''}
-    <div class="panel-actions">
-      <button class="panel-btn panel-btn-green" onclick="openAddTxnFor('${c.id}')">+ Add transaction</button>
-      <button class="panel-btn panel-btn-purple" onclick="closePanel();navigate('transactions',document.querySelector('[data-view=transactions]'))">View all transactions</button>
-    </div>`;
-  document.getElementById('detailPanel').classList.add('open');
-  document.getElementById('panelOverlay').classList.add('open');
-}
-function closePanel(){
-  document.getElementById('detailPanel').classList.remove('open');
-  document.getElementById('panelOverlay').classList.remove('open');
-}
-
-// ─── MODALS ───────────────────────────────────────────────────
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
-
-function openAddCustomer(){
-  ['cf-fname','cf-lname','cf-email','cf-phone','cf-company'].forEach(id=>document.getElementById(id).value='');
-  openModal('addCustModal');
-}
-function openAddTxn(){
-  const sel=document.getElementById('tf-customer');
-  sel.innerHTML='<option value="">Select customer…</option>'+customers.map(c=>`<option value="${c.id}">${c.fname} ${c.lname}</option>`).join('');
-  document.getElementById('tf-amount').value='';
-  document.getElementById('tf-desc').value='';
-  document.getElementById('tf-date').value=new Date().toISOString().split('T')[0];
-  openModal('addTxnModal');
-}
-function openAddTxnFor(custId){
-  closePanel();
-  openAddTxn();
-  setTimeout(()=>{document.getElementById('tf-customer').value=custId;},50);
-}
-
-document.getElementById('tf-type').addEventListener('change',function(){
-  document.getElementById('tf-submit').textContent='Add '+this.value;
-  document.getElementById('tf-submit').className='form-btn '+(this.value==='credit'?'form-btn-green':'form-btn-red');
-});
-
-function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');const inp=document.getElementById(id.replace('-err',''));if(inp)inp.classList.add('err');}
-function clearFormErrs(){document.querySelectorAll('.err-text').forEach(e=>e.classList.remove('show'));document.querySelectorAll('.form-input.err').forEach(e=>e.classList.remove('err'));}
-
-function submitAddCustomer(){
-  clearFormErrs();let ok=true;
-  const fn=document.getElementById('cf-fname').value.trim();
-  const ln=document.getElementById('cf-lname').value.trim();
-  const em=document.getElementById('cf-email').value.trim();
-  if(!fn){showErr('cf-fname-err','Required');ok=false;}
-  if(!ln){showErr('cf-lname-err','Required');ok=false;}
-  if(!em||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){showErr('cf-email-err','Valid email required');ok=false;}
-  if(!ok)return;
-  const c={id:'C'+String(customers.length+1).padStart(4,'0'),fname:fn,lname:ln,email:em,phone:document.getElementById('cf-phone').value.trim(),company:document.getElementById('cf-company').value.trim(),plan:document.getElementById('cf-plan').value,status:document.getElementById('cf-status').value,joined:new Date().toISOString().split('T')[0],color:COLORS[customers.length%COLORS.length]};
-  customers.push(c);updateCounts();closeModal('addCustModal');
-  toast(fn+' '+ln+' added successfully!','success');
-  renderDashboard();
-}
-
-function submitAddTxn(){
-  clearFormErrs();let ok=true;
-  const custId=document.getElementById('tf-customer').value;
-  const amt=parseFloat(document.getElementById('tf-amount').value);
-  const desc=document.getElementById('tf-desc').value.trim();
-  if(!custId){showErr('tf-customer-err','Select a customer');ok=false;}
-  if(!amt||amt<=0){showErr('tf-amount-err','Enter a valid amount');ok=false;}
-  if(!desc){showErr('tf-desc-err','Required');ok=false;}
-  if(!ok)return;
-  const type=document.getElementById('tf-type').value;
-  const date=document.getElementById('tf-date').value||new Date().toISOString().split('T')[0];
-  transactions.push({id:'T'+String(transactions.length+1).padStart(5,'0'),custId,type,amt,desc,date});
-  updateCounts();closeModal('addTxnModal');
-  const c=custById(custId);
-  toast(`${type==='credit'?'Credit':'Debit'} of ${fmt(amt)} added for ${c?c.fname+' '+c.lname:'customer'}!`,type==='credit'?'success':'error');
-  const activeView=document.querySelector('.view.active').id.replace('view-','');
-  if(activeView==='dashboard')renderDashboard();
-  if(activeView==='transactions')renderTransactions();
-  if(activeView==='balance')renderBalance();
-  if(activeView==='history')renderHistory();
-  if(activeView==='customers')renderCustomers();
-}
-
-// ─── GLOBAL SEARCH ────────────────────────────────────────────
-function onGlobalSearch(){
-  const q=document.getElementById('globalSearch').value.trim();
-  if(!q)return;
-  document.getElementById('custSearch').value=q;
-  document.getElementById('txnSearch').value=q;
-  navigate('transactions',document.querySelector('[data-view=transactions]'));
-  renderTransactions();
-}
-
-// ─── TOAST ────────────────────────────────────────────────────
-function toast(msg,type='info'){
-  const t=document.createElement('div');
-  t.className=`toast ${type}`;
-  t.innerHTML=`<div class="toast-dot"></div>${msg}`;
-  document.getElementById('toastContainer').appendChild(t);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
-  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400);},2800);
-}
-
-// ─── INIT ─────────────────────────────────────────────────────
-seed();
-renderDashboard();
-document.getElementById('tf-date').value=new Date().toISOString().split('T')[0];
-</script>
+    <!-- Minimal JS for interactivity -->
+    <script src="app.js"></script>
 </body>
+
 </html>
